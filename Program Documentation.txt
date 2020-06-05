@@ -1,0 +1,261 @@
+seivePrimes
+    @param limit
+    @throws IOException 
+    An implementation of the sieve of Eratosthenes
+    
+    Runs in O(n log log(n)). With n = limit
+    Did 1 mil in about 5 seconds.
+    Did 10 mil in about 8 minutes.
+    100 mil should take about 2 hours to finish.
+     
+readPrimesFromFile
+    @return an array of all the primes
+    @throws IOException  
+    Reads the primes out of the file created by the previous method
+    returns them in an array.
+    
+    Runs in O(n) where n is the number of primes in the file.
+    
+filterPrimes    
+    @param primes An array of integers. Will work for any collection of integers,
+    but only works correctly when it is a collection of primes.
+    @throws IOException 
+    Does not actually return anything, instead prints the results into various files
+    based on the remainder of the value when divided by 12.
+    
+    Writes each file as p , p , p , ... 
+    
+    Runs in O(n) where n is the number of primes in the file.
+    
+solvePrimes
+    @param inputFile a file name as a string. Should only contain primes of a certain type mod 12.
+    @param outputFile a file name as a string. This is where the output of the file is written.
+    @param modType an integer that represents p % 12.
+    @throws IOException 
+     
+    The input file should be formatted p , p , p , ... otherwise it will not work correctly.
+    Takes each prime, and finds the x and y values for the corresponding quadratic form for
+    each type. Something like p = x^2 + xy + y^2, and the coefficients on each value is 
+    different depending on the type of prime.
+    
+    Runs in O(m * n sqrt(n)) where m is the number of primes and n is the largest prime in the input.
+    (This is part of the reason I'm not a super big fan of this notation, because a lot of the internal loops
+     will terminate much sooner than the worst case.)
+     
+calculatePrimes
+    @param inputFile The file name as a string of the list of primes, x and y values, and types to calculate
+    the coefficients for.
+    @param outputFile The file that the results will be written to.
+    @param modType The value of p % 12.
+    @throws IOException 
+    
+    The input file should be formatted p , p , p , ...
+                                       x , x , x , ...
+                                       y , y , y , ...
+                                       t , t , t , ...
+    where t is the type of quadratic form used to solve the prime. It indicates extra
+    values added to the coefficient at the end.
+    
+    Computes the a(p) for each prime in the list using certain polynomials containing
+    the x and y values that differ based on the type. Again stored with a type that
+    indicates if the final a(p) has certain attached values that do not play nicely with
+    computers.
+    
+    Writes the results in a file formatted p , p , p , ...
+                                           a , a , a , ...
+                                           t , t , t , ...
+    Then only for 5 and 7 mod 12 primes -> x , x , x , ...
+                                        -> y , y , y , ...
+    Because the x and y values may need to change based on their sign when added,
+    and they need to be used again later.
+    
+    Runs in O(n) where n = number of primes in the input file.
+    
+combinePrimes1And11Mod12
+    @throws IOException
+    
+    Uses the calculated values of 11 and 1 mod 12 primes to create additional
+    11 mod 12 values. Probably should take the filenames as arguments, but they
+    are hard-coded to what they should be currently.
+    
+    Writes the output to a file formatted v , v , v , ...
+                                          a , a , a , ...
+                                          t , t , t , ...
+    where v = prime1 * prime2 , a = a(v) sans a few things signified by the type t.
+    t = 1 basically means no sqrt(6) and t = 2 means it has a sqrt(6)
+    
+    Runs in O(n m) where n = number of primes 11 mod 12, and m = number of primes 1 mod 12 in the given
+    input files.
+
+combinePrimes5And7Mod12
+    @throws IOException 
+    Functions similarly to the previous function, except it has to account for
+    the a(v) having the form a(v) = x + y(sqrt(6)).
+    The output is formatted v , v , v , ...
+                            x , x , x , ...
+                            y , y , y , ...
+                       
+    Runs in O(n m) where n = number of primes 5 mod 12 and m = number of primes 7 mod 12 in the given
+    input files.
+    
+calculatePrimePowers1And11Mod12
+    @param inputFile name of the input file as a string.
+    @param outputFile name of the output file as a string.
+    @param modType the value of p % 12 for the primes in the input file.
+    @throws IOException 
+    
+    The input should be one of the files created by the calculatePrimes function. The output file will look like a table
+    formatted p, a(p), a(p^2) , a(p^3) , ... , type
+              p, a(p), a(p^2) , a(p^3) , ... , type
+                 ...
+              p, a(p), a(p^2) , a(p^3) , ... , type
+    with values of -1 slotted in for any value that corresponds to a prime power that exceeds the TARGET value.
+    
+    Runs in O (n log T) where n = the number of primes in the input file, and T is the TARGET value.
+    
+calculatePrimePowers5And7Mod12
+    @param inputFile name of the input file as a string
+    @param outputFile name of the output file as a string
+    @param modType value of p % 12 from the input file.
+    @throws IOException 
+    
+    Should only be used with files produced from the "calculatePrimes" method.
+    Calculates all the powers of primes for primes that are 5 or 7 mod 12 and have 
+    prime powers less than the TARGET value.
+    Output is formatted: p , value(p) , a(p) X , a(p) Y , a(p^2) X , a(p^2) Y , a(p^3) X , a(p^3) Y , ... , -1
+                         p , value(p) , a(p) X , a(p) Y , a(p^2) X , a(p^2) Y , a(p^3) X , a(p^3) Y , ... , -1
+                         p , value(p) , a(p) X , a(p) Y , a(p^2) X , a(p^2) Y , a(p^3) X , a(p^3) Y , ... , -1
+                             ...
+                         p , value(p) , a(p) X , a(p) Y , -1 , -1 , ... , -1
+    Again, values of -1 are used to correspond to prime powers that exceed the TARGET value. However, the first
+    four columns are still contain the correct values because they get used for combinations later. a(p) X and a(p) Y,
+    are used to represent a(p) in the form a(p) = X + Y sqrt(6).
+    
+    Runs in O(n log T) where n = the number of primes in the input file, and T is the TARGET value.
+    
+calculateEven5or7Mod12
+    @param inputFile The name of the input file as a string.
+    @param primePowersFile The name of the second input file as a string.
+    @param outputFile The name of the output file as a string.
+    @param modType The value of p % 12 corresponding to the primes in the input file.
+    @throws IOException 
+    
+    Since the product of even numbers of 5 or 7 mod 12 primes is 1 mod 12, these values
+    are useful to have on hand for later combinations, as they can be combined with any
+    11 mod 12 value to create another 11 mod 12 value.
+    
+    The input file should be one of the outputs from the "calculatePrimes" method and the
+    prime powers file should be the file containing the corresponding prime powers.
+    
+    Output is in the form v , v , v , ...
+                          x , x , x , ...
+                          y , y , y , ...
+                          p1 , p1 , p1 , ...
+                          p2 , p2 , p2 , ...
+                          p3 , p3 , p3 , ...
+                          p4 , p4 , p4 , ...
+    Where v = p1 * p2 * p3 * p4, and p3 , p4 = -1 meaning v = p1 * p2. And the 
+    x and y are from the representation of a(v) = x + y sqrt(6).
+    
+    This might need to be extended later or rewritten to use some sort of recursion to handle
+    combinations for larger TARGET values.
+    
+    Runs in O (n^4) where n = number of primes in the first input file.
+    
+combinePrimesAndPowers
+    @throws IOException 
+    
+    Probably one of the more questionable methods I've written.
+    Uses the files produced by the previous methods to create additional
+    combinations of primes that are 11 mod 12.
+    
+    These include odd numbers of 11 mod 12 primes.
+    Odd numbers of 5 mod 12 primes combined with odd numbers of 7 mod 12 primes.
+    
+    Then combinations of primes that are 1 mod 12 include
+    Any number of 1 mod 12 primes
+    even numbers of 5 mod 12 prime
+    even numbers of 7 mod 12 primes
+    even numbers of 11 mod 12 primes.
+    
+    Each combination of 11 mod 12 primes can be combined with any number of
+    combinations that are 1 mod 12 to create more 11 mod 12 primes.
+    
+    Writes various files as outputs to be checked later. These are generally in the form
+    v , v , v , ... OR v , v , v , ...
+    a , a , a , ...    x , x , x , ...
+    t , t , t , ...    y , y , y , ...
+    Occasionally with some additional rows that may be required for testing.
+    
+    Runs in *O(n^5)* where n = max(primes1Mod12 , primes11Mod12 , primes5Mod12 , primes7Mod12)
+    It's hard to keep track for this one, but I think the highest I ever went in one segment was
+    11 mod 12 with 4 1 mod 12.
+    The O notation makes it seem a lot worse than it actually is, the sub-loops should terminate early in
+    basically every iteration.
+    
+writeToFile
+    @param lines An array of array lists or other arrays.
+    @param fileName The name of the output file as a string.
+    @throws IOException 
+    
+    Takes an array of array lists and writes them in order to the given file, 
+    separating each element by a comma and each list on a different line.
+    
+    Runs in O(m * n) where m = max(input in each list) and n = number of lists.
+    
+jacobi
+    @param n top value
+    @param k bottom value
+    @return returns -2 as an error value, otherwise 1, 0, or -1.
+    
+    I had some issues with the original implementation of the function to calculate
+    the Legendre symbol. I re-implemented it as the Jacobi symbol, which functions the
+    same when k is an odd prime, which it will always be in the context of this project.
+    
+jacobiBool
+    @param n top value
+    @param k bottom value
+    @return TRUE if jacobi(n,k) = 1, and FALSE otherwise.
+    
+logBase
+    @param x
+    @param base
+    @return log_base(x)
+    
+    Because Java's math package apparently only supports log_10 and ln.
+    
+chi
+    @param x first variable
+    @param y second variable
+    @return The value of the chi function for x and y.
+
+checkCoefficients
+    @throws IOException 
+    Reads each of the files that contains relevant information (The values that are 11 mod 12)
+    takes the a(p) from that and checks it against a list of the expected values.
+    
+    Outputs to the command line the combinations checked and any failures, formatted
+    Failed at: n Using: N Expected: expected a(p) Got: a(p).
+    
+    Then outputs the number of successfully checked values.
+    Also outputs a file formatted:
+         n , a(n) , x , 
+         n , a(n) ,   ,
+         n , a(n) , x ,
+         n , a(n) ,   , !
+         n , a(n) , x ,
+             ...
+    Where N = 12(n) + 11, and a(n) is what a(N) should be equal to after a few adjustments.
+    If a(N) is the expected value, an x is printed in the next column. If a(N) is not the expected
+    value, nothing is printed in the next column. If n is a multiple of 11, a ! is printed in
+    the fourth column, since the conjecture does not apply to multiples of 11.
+
+adjustedMod
+    @param x The first value as a double
+    @param y The second value as a double
+    @return x % y, but adjusted so it always returns a positive value.
+    
+    Java's implementation of the % operator returns the remainder with the same
+    sign as the x value. This is inconsistent with the definition of congruence
+    classes that this project uses. This is a common fix that allows the first
+    value to be negative and have the output be consistent.
